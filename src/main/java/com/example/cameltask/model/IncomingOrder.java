@@ -9,6 +9,7 @@ import org.apache.camel.dataformat.bindy.annotation.DataField;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -26,23 +27,23 @@ public class IncomingOrder implements Serializable {
     private String salesChannel;
     @DataField(pos = 5)
     private String orderPriority;
-    @DataField(pos = 6)
+    @DataField(pos = 6 , pattern = "M/d/yyyy")
     private LocalDate orderDate;
     @DataField(pos = 7)
     private Long orderId;
-    @DataField(pos = 8)
+    @DataField(pos = 8 , pattern = "M/d/yyyy")
     private LocalDate shipDate;
     @DataField(pos = 9)
     private Long unitsSold;
-    @DataField(pos = 10)
+    @DataField(pos = 10, precision = 2)
     private BigDecimal unitPrice;
-    @DataField(pos = 11)
+    @DataField(pos = 11, precision = 2)
     private BigDecimal unitCost;
-    @DataField(pos = 12)
+    @DataField(pos = 12, precision = 2)
     private BigDecimal totalRevenue;
-    @DataField(pos = 13)
+    @DataField(pos = 13, precision = 2)
     private BigDecimal totalCost;
-    @DataField(pos = 14)
+    @DataField(pos = 14, precision = 2)
     private BigDecimal totalProfit;
 
 }
