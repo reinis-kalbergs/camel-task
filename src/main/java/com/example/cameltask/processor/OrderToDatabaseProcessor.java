@@ -1,7 +1,7 @@
 package com.example.cameltask.processor;
 
 import com.example.cameltask.model.IncomingOrder;
-import com.example.cameltask.model.Order;
+import com.example.cameltask.model.OrderEntity;
 import com.example.cameltask.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;
@@ -16,7 +16,7 @@ public class OrderToDatabaseProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        orderRepository.save(new Order(exchange.getMessage().getBody(IncomingOrder.class)));
+        orderRepository.save(new OrderEntity(exchange.getMessage().getBody(IncomingOrder.class)));
     }
 
 
