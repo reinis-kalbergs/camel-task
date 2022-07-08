@@ -54,10 +54,14 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Add support for CSV marshaling -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-bindy</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-csv</artifactId>
             <version>${camel.version}</version>
         </dependency>
     </dependencies>

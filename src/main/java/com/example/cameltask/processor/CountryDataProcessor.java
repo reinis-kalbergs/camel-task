@@ -19,7 +19,7 @@ public class CountryDataProcessor implements Processor {
                 .orderCount(body.getOrderCount())
                 .averageUnitsSold(BigDecimal.valueOf(body.getUnitsSold() / body.getOrderCount()))
                 .averageUnitPrice(body.getUnitPrice().divide(body.getCountAsBigDecimal(), RoundingMode.HALF_UP))
-                .averageUnitCost(body.getTotalCost().divide(body.getCountAsBigDecimal(), RoundingMode.HALF_UP))
+                .averageUnitCost(body.getUnitCost().divide(body.getCountAsBigDecimal(), RoundingMode.HALF_UP))
                 .totalRevenue(body.getTotalRevenue().divide(BigDecimal.valueOf(1000000L), RoundingMode.HALF_UP))
                 .totalCost(body.getTotalCost().divide(BigDecimal.valueOf(1000000L), RoundingMode.HALF_UP))
                 .totalProfit(body.getTotalProfit().divide(BigDecimal.valueOf(1000000L), RoundingMode.HALF_UP))

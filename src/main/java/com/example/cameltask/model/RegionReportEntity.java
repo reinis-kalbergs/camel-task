@@ -23,11 +23,21 @@ public class RegionReportEntity {
     private String country;
     private Long orderCount;
     private BigDecimal averageUnitsSold;
-    private BigDecimal AverageUnitPrice;
+    private BigDecimal averageUnitPrice;
     private BigDecimal averageUnitCost;
     private BigDecimal totalRevenue;
     private BigDecimal totalCost;
     private BigDecimal totalProfit;
     private String csvFileName;
-    private LocalDateTime ProcessingDate;
+    private LocalDateTime processingDate;
+
+    public RegionReportEntity(CountryData countryData) {
+        this.country = countryData.getCountry();
+        this.averageUnitsSold = countryData.getAverageUnitsSold();
+        this.averageUnitPrice = countryData.getAverageUnitPrice();
+        this.averageUnitCost = countryData.getAverageUnitCost();
+        this.totalRevenue = countryData.getTotalRevenue();
+        this.totalCost = countryData.getTotalCost();
+        this.totalProfit = countryData.getTotalProfit();
+    }
 }

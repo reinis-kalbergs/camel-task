@@ -1,9 +1,12 @@
 package com.example.cameltask.routes;
 
-import com.example.cameltask.filter.OnlineSalesChannelFilter;
+import com.example.cameltask.model.CountryData;
 import com.example.cameltask.model.IncomingOrder;
+import com.example.cameltask.model.RegionData;
+import com.example.cameltask.other.OnlineSalesChannelFilter;
 import com.example.cameltask.processor.CountryDataProcessor;
 import com.example.cameltask.processor.OrderToDatabaseProcessor;
+import com.example.cameltask.processor.RegionReportProcessor;
 import com.example.cameltask.strategy.CountryAggregationStrategy;
 import com.example.cameltask.strategy.RegionAggregationStrategy;
 import lombok.RequiredArgsConstructor;
@@ -39,19 +42,32 @@ public class MyRoute extends RouteBuilder {
                     message.setHeader(REGION_HEADER, incomingOrder.getRegion());
                 })
                 .aggregate(header(COUNTRY_HEADER), new CountryAggregationStrategy())
-                    .completionTimeout(1000)
+                    .completionTimeout(500)
                 .process(new CountryDataProcessor())
                 .aggregate(header(REGION_HEADER), new RegionAggregationStrategy())
-                    .completionTimeout(1000)
+                    .completionTimeout(500)
+                .to("direct:csvregionreport");
+
+
+        from("direct:csvregionreport")
+                .process(exchange -> {
+                    RegionData regionData = exchange.getMessage().getBody(RegionData.class);
+                    exchange.getMessage().setBody(regionData.getRegionData());
+                })
+                    .marshal()
+                        .bindy(BindyType.Csv, CountryData.class)
+                    .to("file:out/reports?fileName=${header.region}_${date:now:yyyy-MM-dd HH.mm.ss}.csv");
+
+        from("file:out/reports?noop=true")
+                .unmarshal()
+                    .bindy(BindyType.Csv, CountryData.class)
+                .split(body())
+                .process(new RegionReportProcessor())
+                // add to db
                 .log("${body}");
 
 
-//        from("timer:first-timer")
-//                .bean("currentTime")
-//                .process(new MyLoggingProcessor())
-//                .to("log:first-timer");
-
-        //getIn() vs getMessage()
-        //make region and country headers some kind of const
+        //.log("${body}")
+        //.bean("currentTime")
     }
 }
