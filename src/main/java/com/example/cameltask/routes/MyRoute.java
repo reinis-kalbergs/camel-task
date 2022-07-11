@@ -26,9 +26,9 @@ public class MyRoute extends RouteBuilder {
     private final NewHeaderProcessor newHeaderProcessor;
 
     @Value("${camel-task.headers.country}")
-    private final String COUNTRY_HEADER;
+    private String COUNTRY_HEADER;
     @Value("${camel-task.headers.region}")
-    private final String REGION_HEADER;
+    private String REGION_HEADER;
 
     @Override
     public void configure() throws Exception {
@@ -39,16 +39,18 @@ public class MyRoute extends RouteBuilder {
                 .split(body())
                 .filter()
                     .method(OnlineSalesChannelFilter.class, "isOnline")
-                .process(orderToDatabaseProcessor)
-                .to("direct:aggregate-region-report");
+                    .to("direct:save-order-to-database","direct:aggregate-region-report");
+
+        from("direct:save-order-to-database")
+                .process(orderToDatabaseProcessor);
 
         from("direct:aggregate-region-report")
                 .process(newHeaderProcessor)
                 .aggregate(header(COUNTRY_HEADER), new CountryAggregationStrategy())
-                    .completionTimeout(1000)
+                    .completionTimeout(5000)
                 .process(new CountryAverageDataProcessor())
                 .aggregate(header(REGION_HEADER), new RegionAggregationStrategy())
-                    .completionTimeout(1000)
+                    .completionTimeout(5000)
                 .to("direct:create-region-report-csv");
 
         from("direct:create-region-report-csv")
@@ -62,7 +64,6 @@ public class MyRoute extends RouteBuilder {
                     .bindy(BindyType.Csv, CountryData.class)
                 .split(body())
                 .process(new RegionReportProcessor())
-                .process(regionReportToDatabaseProcessor)
-                .end();
+                .process(regionReportToDatabaseProcessor);
     }
 }
