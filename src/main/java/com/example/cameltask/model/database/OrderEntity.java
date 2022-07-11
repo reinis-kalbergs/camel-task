@@ -1,5 +1,6 @@
-package com.example.cameltask.model;
+package com.example.cameltask.model.database;
 
+import com.example.cameltask.model.IncomingOrder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

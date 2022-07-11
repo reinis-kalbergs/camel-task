@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CountryTotalsData {
+public class CountryAggregateData {
 
     private String country;
     private String region;

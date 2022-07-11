@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegionData {
+public class RegionAggregateData {
     private List<CountryData> regionData = new ArrayList<>();
 
     public void addCountryData(CountryData countryData) {

@@ -1,7 +1,7 @@
 package com.example.cameltask.processor;
 
 import com.example.cameltask.model.CountryData;
-import com.example.cameltask.model.RegionReportEntity;
+import com.example.cameltask.model.database.RegionReportEntity;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

@@ -1,7 +1,7 @@
 package com.example.cameltask.strategy;
 
 import com.example.cameltask.model.CountryData;
-import com.example.cameltask.model.RegionData;
+import com.example.cameltask.model.RegionAggregateData;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 
@@ -12,14 +12,14 @@ public class RegionAggregationStrategy implements AggregationStrategy {
         if (oldExchange == null) {
             CountryData data = newExchange.getIn().getBody(CountryData.class);
 
-            RegionData regionData = new RegionData();
-            regionData.addCountryData(data);
+            RegionAggregateData regionAggregateData = new RegionAggregateData();
+            regionAggregateData.addCountryData(data);
 
-            newExchange.getMessage().setBody(regionData);
+            newExchange.getMessage().setBody(regionAggregateData);
             return newExchange;
         }
 
-        RegionData oldBody = oldExchange.getMessage().getBody(RegionData.class);
+        RegionAggregateData oldBody = oldExchange.getMessage().getBody(RegionAggregateData.class);
         CountryData newBody = newExchange.getMessage().getBody(CountryData.class);
 
         oldBody.addCountryData(newBody);

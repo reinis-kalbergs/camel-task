@@ -1,17 +1,17 @@
 package com.example.cameltask.processor;
 
+import com.example.cameltask.model.CountryAggregateData;
 import com.example.cameltask.model.CountryData;
-import com.example.cameltask.model.CountryTotalsData;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class CountryDataProcessor implements Processor {
+public class CountryAverageDataProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
-        CountryTotalsData body = exchange.getMessage().getBody(CountryTotalsData.class);
+        CountryAggregateData body = exchange.getMessage().getBody(CountryAggregateData.class);
 
         CountryData countryData = CountryData.builder()
                 .country(body.getCountry())

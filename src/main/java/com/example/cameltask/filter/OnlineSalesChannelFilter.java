@@ -1,4 +1,4 @@
-package com.example.cameltask.other;
+package com.example.cameltask.filter;
 
 import com.example.cameltask.model.IncomingOrder;
 

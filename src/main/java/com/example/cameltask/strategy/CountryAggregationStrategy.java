@@ -1,6 +1,6 @@
 package com.example.cameltask.strategy;
 
-import com.example.cameltask.model.CountryTotalsData;
+import com.example.cameltask.model.CountryAggregateData;
 import com.example.cameltask.model.IncomingOrder;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
@@ -12,8 +12,8 @@ public class CountryAggregationStrategy implements AggregationStrategy {
         if (oldExchange == null) {
             IncomingOrder body = newExchange.getIn().getBody(IncomingOrder.class);
 
-            CountryTotalsData countryTotalsData =
-                    CountryTotalsData.builder()
+            CountryAggregateData countryTotalsData =
+                    CountryAggregateData.builder()
                             .country(body.getCountry())
                             .region(body.getRegion())
                             .orderCount(1L)
@@ -28,10 +28,10 @@ public class CountryAggregationStrategy implements AggregationStrategy {
             newExchange.getMessage().setBody(countryTotalsData);
             return newExchange;
         }
-        CountryTotalsData oldBody = oldExchange.getIn().getBody(CountryTotalsData.class);
+        CountryAggregateData oldBody = oldExchange.getIn().getBody(CountryAggregateData.class);
         IncomingOrder newBody = newExchange.getIn().getBody(IncomingOrder.class);
 
-        CountryTotalsData aggregatedData = CountryTotalsData.builder()
+        CountryAggregateData aggregatedData = CountryAggregateData.builder()
                 .country(oldBody.getCountry())
                 .region(oldBody.getRegion())
                 .orderCount(oldBody.getOrderCount() + 1)

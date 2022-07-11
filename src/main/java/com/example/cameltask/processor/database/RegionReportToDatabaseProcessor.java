@@ -1,6 +1,6 @@
 package com.example.cameltask.processor.database;
 
-import com.example.cameltask.model.RegionReportEntity;
+import com.example.cameltask.model.database.RegionReportEntity;
 import com.example.cameltask.repository.RegionReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;

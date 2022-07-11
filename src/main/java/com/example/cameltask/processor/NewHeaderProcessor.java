@@ -18,11 +18,9 @@ public class NewHeaderProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        Message message = exchange.getIn();
-        IncomingOrder incomingOrder = exchange.getIn().getBody(IncomingOrder.class);
-        String region = incomingOrder.getRegion();
-        String country = incomingOrder.getCountry();
-        exchange.getMessage().setHeader(COUNTRY_HEADER, region);
-        exchange.getMessage().setHeader(REGION_HEADER, country);
+        Message message = exchange.getMessage();
+        IncomingOrder incomingOrder = message.getBody(IncomingOrder.class);
+        message.setHeader(COUNTRY_HEADER, incomingOrder.getCountry());
+        message.setHeader(REGION_HEADER, incomingOrder.getRegion());
     }
 }

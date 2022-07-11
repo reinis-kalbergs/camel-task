@@ -1,6 +1,6 @@
 package com.example.cameltask.repository;
 
-import com.example.cameltask.model.OrderEntity;
+import com.example.cameltask.model.database.OrderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
