@@ -18,7 +18,6 @@ public class CountryData {
 
     @DataField(pos = 1)
     private String country;
-    private String region;
     @DataField(pos = 2)
     private Long orderCount;
     @DataField(pos = 3, precision = 2, pattern = "00.00")

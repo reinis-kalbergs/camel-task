@@ -15,7 +15,6 @@ public class CountryDataProcessor implements Processor {
 
         CountryData countryData = CountryData.builder()
                 .country(body.getCountry())
-                .region(body.getRegion())
                 .orderCount(body.getOrderCount())
                 .averageUnitsSold(BigDecimal.valueOf(body.getUnitsSold() / body.getOrderCount()))
                 .averageUnitPrice(body.getUnitPrice().divide(body.getCountAsBigDecimal(), RoundingMode.HALF_UP))

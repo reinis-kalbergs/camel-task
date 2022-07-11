@@ -1,4 +1,4 @@
-package com.example.cameltask.processor;
+package com.example.cameltask.processor.database;
 
 import com.example.cameltask.model.IncomingOrder;
 import com.example.cameltask.model.OrderEntity;

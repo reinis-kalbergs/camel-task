@@ -33,6 +33,7 @@ public class RegionReportEntity {
 
     public RegionReportEntity(CountryData countryData) {
         this.country = countryData.getCountry();
+        this.orderCount = countryData.getOrderCount();
         this.averageUnitsSold = countryData.getAverageUnitsSold();
         this.averageUnitPrice = countryData.getAverageUnitPrice();
         this.averageUnitCost = countryData.getAverageUnitCost();
