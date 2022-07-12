@@ -47,10 +47,10 @@ public class MyRoute extends RouteBuilder {
         from("direct:aggregate-region-report")
                 .process(newHeaderProcessor)
                 .aggregate(header(COUNTRY_HEADER), new CountryAggregationStrategy())
-                    .completionTimeout(5000)
+                    .completionTimeout(1000)
                 .process(new CountryAverageDataProcessor())
                 .aggregate(header(REGION_HEADER), new RegionAggregationStrategy())
-                    .completionTimeout(5000)
+                    .completionTimeout(1000)
                 .to("direct:create-region-report-csv");
 
         from("direct:create-region-report-csv")

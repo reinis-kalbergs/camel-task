@@ -1,12 +1,13 @@
 package com.example.cameltask.routes;
 
+import com.example.cameltask.model.CountryData;
 import com.example.cameltask.model.IncomingOrder;
+import com.example.cameltask.model.RegionAggregateData;
 import com.example.cameltask.model.database.OrderEntity;
-import com.example.cameltask.processor.NewHeaderProcessor;
+import com.example.cameltask.model.database.RegionReportEntity;
 import com.example.cameltask.repository.OrderRepository;
 import com.example.cameltask.repository.RegionReportRepository;
 import org.apache.camel.EndpointInject;
-import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
@@ -23,7 +24,7 @@ import java.util.List;
 
 @SpringBootTest
 @CamelSpringBootTest
-@MockEndpoints("*")//direct:save-order-to-database
+@MockEndpoints
 public class MyRouteTest {
 
     @Autowired
@@ -32,10 +33,13 @@ public class MyRouteTest {
     @EndpointInject("mock:direct:save-order-to-database")
     MockEndpoint mockSaveToDb;
 
+    @EndpointInject("mock:direct:aggregate-region-report")
+    MockEndpoint mockAggregateRegionReportCsv;
+
     @EndpointInject("mock:direct:create-region-report-csv")
     MockEndpoint mockCreateRegionReportCsv;
 
-    @EndpointInject("mock:file:out/reports?fileName=${header.region}_${date:now:yyyy-MM-dd HH.mm.ss}.csv")
+    @EndpointInject("mock:file:out/reports")
     MockEndpoint mockWriteRegionReportCsv;
 
     @Autowired
@@ -50,7 +54,7 @@ public class MyRouteTest {
         regionReportRepository.deleteAll();
     }
 
-    final IncomingOrder TEST_INCOMING_ORDER = new IncomingOrder(
+    final IncomingOrder INCOMING_ORDER_1 = new IncomingOrder(
             "North America", "Canada", "Fruits", "Online", "H",
             LocalDate.of(2013, 11, 15),
             137209212L,
@@ -61,6 +65,50 @@ public class MyRouteTest {
             new BigDecimal("19686.30"),
             new BigDecimal("14601.20"),
             new BigDecimal("5085.10"));
+
+    final IncomingOrder INCOMING_ORDER_2 = new IncomingOrder(
+            "North America", "Canada", "Cosmetics", "Online", "H",
+            LocalDate.of(2013, 11, 15),
+            572010314L,
+            LocalDate.of(2013, 12, 19),
+            9418L,
+            new BigDecimal("437.20"),
+            new BigDecimal("263.33"),
+            new BigDecimal("4117549.60"),
+            new BigDecimal("2480041.94"),
+            new BigDecimal("1637507.66"));
+
+    final IncomingOrder INCOMING_ORDER_3 = new IncomingOrder(
+            "North America", "USA", "Cosmetics", "Online", "H",
+            LocalDate.of(2013, 11, 15),
+            572010314L,
+            LocalDate.of(2013, 12, 19),
+            9418L,
+            new BigDecimal("437.20"),
+            new BigDecimal("263.33"),
+            new BigDecimal("4117549.60"),
+            new BigDecimal("2480041.94"),
+            new BigDecimal("1637507.66"));
+
+    final CountryData COUNTRY_DATA_1 = CountryData.builder()
+            .country("USA")
+            .orderCount(1L)
+            .averageUnitsSold(new BigDecimal("9418"))
+            .averageUnitPrice(new BigDecimal("437.20"))
+            .averageUnitCost(new BigDecimal("263.33"))
+            .totalRevenue(new BigDecimal("4.12"))
+            .totalCost(new BigDecimal("2.48"))
+            .totalProfit(new BigDecimal("1.64")).build();
+
+    final CountryData COUNTRY_DATA_2 = CountryData.builder()
+            .country("Canada")
+            .orderCount(4L)
+            .averageUnitsSold(new BigDecimal("3937"))
+            .averageUnitPrice(new BigDecimal("116.30"))
+            .averageUnitCost(new BigDecimal("71.02"))
+            .totalRevenue(new BigDecimal("4.18"))
+            .totalCost(new BigDecimal("2.52"))
+            .totalProfit(new BigDecimal("1.65")).build();
 
     @Test
     void shouldConvertToObjectAndFilterOnlineOrders() throws InterruptedException {
@@ -82,14 +130,14 @@ public class MyRouteTest {
     @Test
     void shouldAddIncomingOrderToDatabase() {
 
-        template.sendBody("direct:save-order-to-database", TEST_INCOMING_ORDER);
+        template.sendBody("direct:save-order-to-database", INCOMING_ORDER_1);
 
         List<OrderEntity> result = orderRepository.findAll();
 
         Assertions.assertThat(result).hasSize(1);
         OrderEntity actualResult = result.get(0);
 
-        OrderEntity expectedResult = new OrderEntity(TEST_INCOMING_ORDER);
+        OrderEntity expectedResult = new OrderEntity(INCOMING_ORDER_1);
         expectedResult.setId(1L);
 
         Assertions.assertThat(expectedResult).isEqualTo(actualResult);
@@ -98,40 +146,56 @@ public class MyRouteTest {
     @Test
     void shouldAddHeaders() throws InterruptedException {
 
-        template.sendBody("direct:aggregate-region-report", TEST_INCOMING_ORDER);
+        template.sendBody("direct:aggregate-region-report", INCOMING_ORDER_1);
 
         mockCreateRegionReportCsv.expectedHeaderReceived("region", "North America");
         mockCreateRegionReportCsv.expectedHeaderReceived("country", "Canada");
-
-        //todo: why is this not being received?
+        mockCreateRegionReportCsv.expectedMessageCount(1);
 
         mockCreateRegionReportCsv.assertIsSatisfied();
     }
 
     @Test
     void shouldAggregateByRegions() throws InterruptedException {
-        IncomingOrder incomingOrder1 = new IncomingOrder(
-                "North America", "Canada", "Cosmetics", "Online", "H",
-                LocalDate.of(2013, 11, 15),
-                572010314L,
-                LocalDate.of(2013, 12, 19),
-                9418L,
-                new BigDecimal("437.20"),
-                new BigDecimal("263.33"),
-                new BigDecimal("4117549.60"),
-                new BigDecimal("2480041.94"),
-                new BigDecimal("1637507.66"));
 
-        template.sendBody("direct:aggregate-region-report", TEST_INCOMING_ORDER);
-        template.sendBody("direct:aggregate-region-report", incomingOrder1);
+        RegionAggregateData expectedResult = new RegionAggregateData(List.of(COUNTRY_DATA_1, COUNTRY_DATA_2));
 
-        //todo: why is this not being received?
+        template.sendBody("direct:aggregate-region-report", INCOMING_ORDER_1);
+        template.sendBody("direct:aggregate-region-report", INCOMING_ORDER_2);
+        template.sendBody("direct:aggregate-region-report", INCOMING_ORDER_3);
+
+        mockCreateRegionReportCsv.expectedMessageCount(1);
+        mockCreateRegionReportCsv.expectedBodiesReceived(expectedResult);
 
         mockCreateRegionReportCsv.assertIsSatisfied();
     }
 
-    /*@Test
-    void shouldSaveRegionReportToDatabase() {
+    @Test
+    void shouldWriteRegionReportToCsv() throws InterruptedException {
+        RegionAggregateData expectedResult = new RegionAggregateData(List.of(COUNTRY_DATA_1, COUNTRY_DATA_2));
 
-    }*/
+        template.sendBody("direct:create-region-report-csv", expectedResult);
+
+        mockWriteRegionReportCsv.expectedBodiesReceived(
+                "country,orderCount,averageUnitsSold,averageUnitPrice,averageUnitCost,totalRevenue,totalCost,totalProfit\n" +
+                        "USA,1,9418,437.20,263.33,4.12,2.48,1.64\n" +
+                        "Canada,4,3937,116.30,71.02,4.18,2.52,1.65"
+        );
+        mockWriteRegionReportCsv.assertIsSatisfied();
+    }
+
+    @Test
+    void shouldSaveRegionReportToDatabase() throws InterruptedException {
+        template.sendBodyAndHeader(
+                "file:out/reports",
+                "country,orderCount,averageUnitsSold,averageUnitPrice,averageUnitCost,totalRevenue,totalCost,totalProfit\n" +
+                        "USA,1,9418,437.20,263.33,4.12,2.48,1.64\n" +
+                        "Canada,4,3937,116.30,71.02,4.18,2.52,1.65",
+                "CamelFileName",
+                "North America_1999-11-11 11.11.11.csv"
+        );
+        Thread.sleep(3000);
+        List<RegionReportEntity> regionReports = regionReportRepository.findAll();
+        Assertions.assertThat(regionReports).hasSize(2);
+    }
 }
