@@ -18,7 +18,7 @@ public class RegionReportProcessor implements Processor {
         CountryData countryData = exchange.getMessage().getBody(CountryData.class);
         RegionReportEntity regionReport = new RegionReportEntity(countryData);
 
-        String fileName = (String) exchange.getMessage().getHeader("CamelFileName");
+        String fileName = (String) exchange.getMessage().getHeader("custom-file-name");
         addInfoFromFileName(regionReport, fileName);
 
         exchange.getMessage().setBody(regionReport);

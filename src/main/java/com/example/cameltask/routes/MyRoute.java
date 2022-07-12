@@ -3,10 +3,7 @@ package com.example.cameltask.routes;
 import com.example.cameltask.filter.OnlineSalesChannelFilter;
 import com.example.cameltask.model.CountryData;
 import com.example.cameltask.model.IncomingOrder;
-import com.example.cameltask.processor.CountryAverageDataProcessor;
-import com.example.cameltask.processor.NewHeaderProcessor;
-import com.example.cameltask.processor.RegionDataToListProcessor;
-import com.example.cameltask.processor.RegionReportProcessor;
+import com.example.cameltask.processor.*;
 import com.example.cameltask.processor.database.OrderToDatabaseProcessor;
 import com.example.cameltask.processor.database.RegionReportToDatabaseProcessor;
 import com.example.cameltask.strategy.CountryAggregationStrategy;
@@ -33,7 +30,7 @@ public class MyRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
 
-        from("file:in?noop=true")
+        from("file:in?delete=true")
                 .unmarshal()
                     .bindy(BindyType.Csv, IncomingOrder.class)
                 .split(body())
@@ -51,17 +48,17 @@ public class MyRoute extends RouteBuilder {
                 .process(new CountryAverageDataProcessor())
                 .aggregate(header(REGION_HEADER), new RegionAggregationStrategy())
                     .completionTimeout(1000)
-                .to("direct:create-region-report-csv");
+                .process(new RegionDataToListProcessor())
+                .process(new CustomFileNameHeaderProcessor())
+                .multicast()
+                    .to("direct:create-region-report-csv","direct:save-region-report-to-database");
 
         from("direct:create-region-report-csv")
-                .process(new RegionDataToListProcessor())
                 .marshal()
                     .bindy(BindyType.Csv, CountryData.class)
-                .to("file:out/reports?fileName=${header.region}_${date:now:yyyy-MM-dd HH.mm.ss}.csv");
+                .to("file:out/reports?fileName=${header.custom-file-name}");
 
-        from("file:out/reports?noop=true")
-                .unmarshal()
-                    .bindy(BindyType.Csv, CountryData.class)
+        from("direct:save-region-report-to-database")
                 .split(body())
                 .process(new RegionReportProcessor())
                 .process(regionReportToDatabaseProcessor);
