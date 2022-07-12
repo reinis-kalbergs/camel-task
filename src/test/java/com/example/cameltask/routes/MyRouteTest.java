@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @SpringBootTest
@@ -186,16 +187,50 @@ public class MyRouteTest {
 
     @Test
     void shouldSaveRegionReportToDatabase() throws InterruptedException {
+        String fileName = "North America_1999-11-11 11.11.11.csv";
         template.sendBodyAndHeader(
                 "file:out/reports",
                 "country,orderCount,averageUnitsSold,averageUnitPrice,averageUnitCost,totalRevenue,totalCost,totalProfit\n" +
                         "USA,1,9418,437.20,263.33,4.12,2.48,1.64\n" +
                         "Canada,4,3937,116.30,71.02,4.18,2.52,1.65",
                 "CamelFileName",
-                "North America_1999-11-11 11.11.11.csv"
+                fileName
         );
+
+        RegionReportEntity expectedRegionReport1 = RegionReportEntity.builder()
+                .country("USA")
+                .orderCount(1L)
+                .averageUnitsSold(new BigDecimal("9418.00"))
+                .averageUnitPrice(new BigDecimal("437.20"))
+                .averageUnitCost(new BigDecimal("263.33"))
+                .totalRevenue(new BigDecimal("4.12"))
+                .totalCost(new BigDecimal("2.48"))
+                .totalProfit(new BigDecimal("1.64"))
+                .csvFileName(fileName)
+                .id(1L)
+                .region("North America")
+                .processingDate(LocalDateTime.parse("1999-11-11T11:11:11"))
+                .build();
+        RegionReportEntity expectedRegionReport2 = RegionReportEntity.builder()
+                .country("Canada")
+                .orderCount(4L)
+                .averageUnitsSold(new BigDecimal("3937.00"))
+                .averageUnitPrice(new BigDecimal("116.30"))
+                .averageUnitCost(new BigDecimal("71.02"))
+                .totalRevenue(new BigDecimal("4.18"))
+                .totalCost(new BigDecimal("2.52"))
+                .totalProfit(new BigDecimal("1.65"))
+                .csvFileName(fileName)
+                .id(2L)
+                .region("North America")
+                .processingDate(LocalDateTime.parse("1999-11-11T11:11:11"))
+                .build();
+
         Thread.sleep(3000);
+
         List<RegionReportEntity> regionReports = regionReportRepository.findAll();
+
+        Assertions.assertThat(regionReports).containsAll(List.of(expectedRegionReport1, expectedRegionReport2));
         Assertions.assertThat(regionReports).hasSize(2);
     }
 }
