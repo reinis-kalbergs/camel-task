@@ -36,7 +36,9 @@ public class MyRoute extends RouteBuilder {
                 .split(body())
                 .filter()
                     .method(OnlineSalesChannelFilter.class, "isOnline")
-                    .to("direct:save-order-to-database","direct:aggregate-region-report");
+                .multicast()
+                    .to("direct:save-order-to-database")
+                    .to("direct:aggregate-region-report");
 
         from("direct:save-order-to-database")
                 .process(orderToDatabaseProcessor);
@@ -51,7 +53,8 @@ public class MyRoute extends RouteBuilder {
                 .process(new RegionDataToListProcessor())
                 .process(new CustomFileNameHeaderProcessor())
                 .multicast()
-                    .to("direct:create-region-report-csv","direct:save-region-report-to-database");
+                    .to("direct:create-region-report-csv")
+                    .to("direct:save-region-report-to-database");
 
         from("direct:create-region-report-csv")
                 .marshal()
