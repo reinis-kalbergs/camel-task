@@ -53,6 +53,8 @@ public class MyRouteTest {
     @Autowired
     RegionReportRepository regionReportRepository;
 
+    StopSendingProcessor stopSendingProcessor = new StopSendingProcessor();
+
     @BeforeEach
     void setUp() {
         orderRepository.deleteAll();
@@ -93,7 +95,7 @@ public class MyRouteTest {
 
     @Test
     void shouldConvertToObjectAndFilterOnlineOrders() throws InterruptedException {
-        mockAggregateRegionReportCsv.whenAnyExchangeReceived(new StopSendingProcessor());
+        mockAggregateRegionReportCsv.whenAnyExchangeReceived(stopSendingProcessor);
 
         mockSaveOrderToDb.expectedBodiesReceived(
                 "IncomingOrder(region=North America, country=Canada, itemType=Fruits, salesChannel=Online, orderPriority=H, orderDate=2013-11-15, orderId=137209212, shipDate=2013-12-29, unitsSold=2110, unitPrice=9.33, unitCost=6.92, totalRevenue=19686.30, totalCost=14601.20, totalProfit=5085.10)"
@@ -127,8 +129,8 @@ public class MyRouteTest {
     @Test
     void shouldAddHeaders() throws InterruptedException {
 
-        mockCreateRegionReportCsv.whenAnyExchangeReceived(new StopSendingProcessor());
-        mockSaveRegionReportToDatabase.whenAnyExchangeReceived(new StopSendingProcessor());
+        mockCreateRegionReportCsv.whenAnyExchangeReceived(stopSendingProcessor);
+        mockSaveRegionReportToDatabase.whenAnyExchangeReceived(stopSendingProcessor);
 
         mockCreateRegionReportCsv.expectedHeaderReceived("region", "North America");
         mockCreateRegionReportCsv.expectedHeaderReceived("country", "Canada");
@@ -143,7 +145,7 @@ public class MyRouteTest {
     @Test
     void shouldAggregateByRegions() throws InterruptedException {
 
-        mockSaveRegionReportToDatabase.whenAnyExchangeReceived(new StopSendingProcessor());
+        mockSaveRegionReportToDatabase.whenAnyExchangeReceived(stopSendingProcessor);
 
         IncomingOrder incomingOrder2 = new IncomingOrder(
                 "North America", "Canada", "Cosmetics", "Online", "H",
@@ -183,7 +185,7 @@ public class MyRouteTest {
 
     @Test
     void shouldWriteRegionReportToCsv() throws InterruptedException {
-        mockFileOut.whenAnyExchangeReceived(new StopSendingProcessor());
+        mockFileOut.whenAnyExchangeReceived(stopSendingProcessor);
         List<CountryData> expectedResult = List.of(COUNTRY_DATA_1, COUNTRY_DATA_2);
 
         template.sendBody("direct:create-region-report-csv", expectedResult);
