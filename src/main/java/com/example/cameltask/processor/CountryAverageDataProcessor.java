@@ -4,10 +4,12 @@ import com.example.cameltask.model.CountryAggregateData;
 import com.example.cameltask.model.CountryData;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@Component
 public class CountryAverageDataProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {

@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 @RequiredArgsConstructor
-public class RegionReportProcessor implements Processor {
+public class RegionReportToEntityProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
         CountryData countryData = exchange.getMessage().getBody(CountryData.class);

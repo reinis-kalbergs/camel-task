@@ -2,10 +2,12 @@ package com.example.cameltask.processor;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Component
 public class CustomFileNameHeaderProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {

@@ -136,7 +136,7 @@ public class MyRouteTest {
 
         template.sendBody("direct:aggregate-region-report", INCOMING_ORDER_1);
 
-        mockCreateRegionReportCsv.setAssertPeriod(5000);
+        mockCreateRegionReportCsv.setAssertPeriod(2000);
         mockCreateRegionReportCsv.assertIsSatisfied();
     }
 
@@ -217,8 +217,6 @@ public class MyRouteTest {
                 .region("North America")
                 .processingDate(LocalDateTime.parse("1999-11-11T11:11:11"))
                 .build();
-
-        Thread.sleep(3000);
 
         List<RegionReportEntity> regionReports = regionReportRepository.findAll();
 

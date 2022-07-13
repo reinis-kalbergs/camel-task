@@ -4,7 +4,9 @@ import com.example.cameltask.model.CountryData;
 import com.example.cameltask.model.RegionAggregateData;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RegionAggregationStrategy implements AggregationStrategy {
 
     @Override

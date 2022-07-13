@@ -22,10 +22,25 @@ public class MyRoute extends RouteBuilder {
     private final RegionReportToDatabaseProcessor regionReportToDatabaseProcessor;
     private final NewHeaderProcessor newHeaderProcessor;
 
+    private final CountryAverageDataProcessor countryAverageDataProcessor;
+
+    private final RegionDataToListProcessor regionDataToListProcessor;
+
+    private final CustomFileNameHeaderProcessor customFileNameHeaderProcessor;
+
+    private final RegionReportToEntityProcessor regionReportToEntityProcessor;
+
+    private final CountryAggregationStrategy countryAggregationStrategy;
+
+    private final RegionAggregationStrategy regionAggregationStrategy;
+
     @Value("${camel-task.headers.country}")
     private String COUNTRY_HEADER;
     @Value("${camel-task.headers.region}")
     private String REGION_HEADER;
+
+    @Value("${camel-task.property.aggregation-timeout}")
+    private Integer aggregationTimeout;
 
     @Override
     public void configure() throws Exception {
@@ -45,13 +60,13 @@ public class MyRoute extends RouteBuilder {
 
         from("direct:aggregate-region-report")
                 .process(newHeaderProcessor)
-                .aggregate(header(COUNTRY_HEADER), new CountryAggregationStrategy())
-                    .completionTimeout(1000)
-                .process(new CountryAverageDataProcessor())
-                .aggregate(header(REGION_HEADER), new RegionAggregationStrategy())
-                    .completionTimeout(1000)
-                .process(new RegionDataToListProcessor())
-                .process(new CustomFileNameHeaderProcessor())
+                .aggregate(header(COUNTRY_HEADER), countryAggregationStrategy)
+                    .completionTimeout(aggregationTimeout)
+                .process(countryAverageDataProcessor)
+                .aggregate(header(REGION_HEADER), regionAggregationStrategy)
+                    .completionTimeout(aggregationTimeout)
+                .process(regionDataToListProcessor)
+                .process(customFileNameHeaderProcessor)
                 .multicast()
                     .to("direct:create-region-report-csv")
                     .to("direct:save-region-report-to-database");
@@ -63,7 +78,7 @@ public class MyRoute extends RouteBuilder {
 
         from("direct:save-region-report-to-database")
                 .split(body())
-                .process(new RegionReportProcessor())
+                .process(regionReportToEntityProcessor)
                 .process(regionReportToDatabaseProcessor);
     }
 }
